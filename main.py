@@ -1,47 +1,44 @@
 from random import shuffle
 from tkinter import *
 import time
-import string
-
-BOARD_SIZE = 4
-SQUARE_SIZE = 140
-EMPTY_SQUARE = BOARD_SIZE ** 2
+import sys
+from tkinter import ttk
 
 problems = [
-    "9*9",
-    "9*8",
-    "9*7",
-    "8*8",
-    "8*7",
-    "8*6",
-    "7*7",
-    "7*6",
-    "7*5",
-    "6*6",
-    "6*5",
-    "6*4",
-    "5*5",
-    "5*4",
-    "5*3",
-    "4*4"
+    ["9*9", "aaa", "aaa", "aaa"],
+    ["9*8", "aaa", "aaa", "aaa"],
+    ["9*7", "aaa", "aaa", "aaa"],
+    ["8*8", "aaa", "aaa", "aaa"],
+    ["8*7", "aaa", "aaa", "aaa"],
+    ["8*6", "aaa", "aaa", "aaa"],
+    ["7*7", "aaa", "aaa", "aaa"],
+    ["7*6", "aaa", "aaa", "aaa"],
+    ["7*5", "aaa", "aaa", "aaa"],
+    ["6*6", "aaa", "aaa", "aaa"],
+    ["6*5", "aaa", "aaa", "aaa"],
+    ["6*4", "aaa", "aaa", "aaa"],
+    ["5*5", "aaa", "aaa", "aaa"],
+    ["5*4", "aaa", "aaa", "aaa"],
+    ["5*3", "aaa", "aaa", "aaa"],
+    ["4*4", "aaa", "aaa", "aaa"]
 ]
 answers = [
-    "81",
-    "72",
-    "63",
-    "64",
-    "56",
-    "48",
-    "49",
-    "42",
-    "35",
-    "36",
-    "30",
-    "24",
-    "25",
-    "20",
-    "15",
-    "16"
+    ["81", "", "", ""],
+    ["72", "", "", ""],
+    ["63", "", "", ""],
+    ["64", "", "", ""],
+    ["56", "", "", ""],
+    ["48", "", "", ""],
+    ["49", "", "", ""],
+    ["42", "", "", ""],
+    ["35", "", "", ""],
+    ["36", "", "", ""],
+    ["30", "", "", ""],
+    ["24", "", "", ""],
+    ["25", "", "", ""],
+    ["20", "", "", ""],
+    ["15", "", "", ""],
+    ["16", "", "", ""]
 ]
 
 solved = [
@@ -63,8 +60,46 @@ solved = [
     False
 ]
 
+BOARD_SIZE = 4
+SQUARE_SIZE = 140
+EMPTY_SQUARE = BOARD_SIZE ** 2
+
 root = Tk()
 root.title("Игра пятнашки")
+
+league = Toplevel()
+league.title("Выбери сложность!")
+league.geometry("300x160")
+league.after(1, lambda: league.focus_force())
+var = IntVar()
+Radiobutton(league, text='1 ЛИГА', variable=var, value=0).pack()
+Radiobutton(league, text='2 ЛИГА', variable=var, value=1).pack()
+Radiobutton(league, text='3 ЛИГА', variable=var, value=2).pack()
+Radiobutton(league, text='4 ЛИГА', variable=var, value=3).pack()
+button1 = Button(league, text="Играть!", command=lambda: choose_lvl())
+button1.pack()
+button2 = Button(league, text="Закрыть", command=lambda: close_game())
+button2.pack()
+
+league.protocol("WM_DELETE_WINDOW", lambda: close_game())
+
+
+lvl = 0
+
+
+def choose_lvl():
+    global lvl
+    lvl = var.get()
+    print(lvl)
+    root.deiconify()  # Показываем основное окно
+    league.destroy()  # Уничтожаем окно выбора сложности
+
+
+def close_game():
+    league.destroy() # Уничтожаем окно выбора сложности
+    root.destroy() # Уничтожаем основное окно
+    sys.exit() # Выходим из программы
+
 
 c = Canvas(root, width=BOARD_SIZE * SQUARE_SIZE,
            height=BOARD_SIZE * SQUARE_SIZE, bg='#808080')
@@ -86,7 +121,7 @@ def get_inv_count():
 
 
 def is_solvable():
-    """ Функция определяющая имеет ли головоломка рещение """
+    """ Функция определяющая имеет ли головоломка решение """
     num_inversions = get_inv_count()
     if BOARD_SIZE % 2 != 0:
         return num_inversions % 2 == 0
@@ -158,10 +193,13 @@ def show_victory_plate():
 
 
 def show_problem(ind, board_index, empty_index):
+    print(ind, board_index, empty_index)
+
     def check_answer():
         answer = str(ans_entry.get())
         answer = ''.join(answer.split())
-        if answer == answers[ind]:
+        print(answer)
+        if answer == answers[ind][lvl]:
             solved[ind] = True
             res = Label(prob, text="Ответ верный!\nМожешь закрыть это окно", font="Arial 12")
             res.grid(row=2, column=0, padx=5, pady=5)
@@ -184,12 +222,11 @@ def show_problem(ind, board_index, empty_index):
     prob.geometry(size + "x" + size)
     prob.after(1, lambda: prob.focus_force())
 
-    problem = Label(prob, text=problems[ind], font="Arial 12")
+    problem = Label(prob, text=problems[ind][lvl], font="Arial 12")
     problem.grid(row=0, column=0, padx=5, pady=5)
     ans_entry = Entry(prob, width=35)
     ans_entry.after(1, lambda: ans_entry.focus_force())
     ans_entry.grid(row=1, column=0, padx=5, pady=5)
-    ans_entry.delete(0, END)
     message_button = Button(prob, text="Проверить", command=check_answer)
     message_button.grid(row=1, column=1, padx=5, pady=5)
 
@@ -224,10 +261,9 @@ c.pack()
 
 board = list(range(1, EMPTY_SQUARE + 1))
 correct_board = board[:]
-shuffle(board)
-
-while not is_solvable():
-    shuffle(board)
+board = [12, 13, 16, 4, 10, 2, 1, 5, 7, 3, 9, 6, 14, 11, 15, 8]
 
 draw_board()
+root.withdraw() # Скрываем основное окно, пока показываем окно выбора сложности
+
 root.mainloop()
